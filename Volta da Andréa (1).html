@@ -1,0 +1,683 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Volta da Andréa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: uma quadra de vôlei vista de cima. O topo é a quadra (título + placar), a rede separa o mural de recados. */
+:root {
+  --bg: #F4EBDD;
+  --surface: #FFFBF4;
+  --fg: #14263D;
+  --muted: #566678;
+  --line: #D6C3A3;
+  --court-line: rgba(20, 38, 61, 0.16);
+  --accent: #C93E14;
+  --on-accent: #FFFFFF;
+  --focus: #1F5FBF;
+  --board: #0B1B30;
+  --board-line: #24405F;
+  --led: #FFC83D;
+  --led-dim: #C9B27A;
+  --net: rgba(20, 38, 61, 0.28);
+  --n1-bg: #FFE9A8; --n1-fg: #3B2E05;
+  --n2-bg: #CFE3FF; --n2-fg: #0F2A4D;
+  --n3-bg: #FFD3C2; --n3-fg: #4A1D0D;
+  --n4-bg: #D4F0DC; --n4-fg: #123824;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1B2E;
+    --surface: #12253B;
+    --fg: #EAF0F7;
+    --muted: #9FB1C5;
+    --line: #294765;
+    --court-line: rgba(255, 255, 255, 0.14);
+    --accent: #FF7A4D;
+    --on-accent: #0C1B2E;
+    --focus: #7DB2FF;
+    --board: #07121F;
+    --board-line: #24405F;
+    --net: rgba(255, 255, 255, 0.22);
+    --n1-bg: #4A3D0E; --n1-fg: #FFE9A8;
+    --n2-bg: #17365E; --n2-fg: #CFE3FF;
+    --n3-bg: #5A2A1C; --n3-fg: #FFD3C2;
+    --n4-bg: #1B4A2E; --n4-fg: #D4F0DC;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1B2E;
+  --surface: #12253B;
+  --fg: #EAF0F7;
+  --muted: #9FB1C5;
+  --line: #294765;
+  --court-line: rgba(255, 255, 255, 0.14);
+  --accent: #FF7A4D;
+  --on-accent: #0C1B2E;
+  --focus: #7DB2FF;
+  --board: #07121F;
+  --board-line: #24405F;
+  --net: rgba(255, 255, 255, 0.22);
+  --n1-bg: #4A3D0E; --n1-fg: #FFE9A8;
+  --n2-bg: #17365E; --n2-fg: #CFE3FF;
+  --n3-bg: #5A2A1C; --n3-fg: #FFD3C2;
+  --n4-bg: #1B4A2E; --n4-fg: #D4F0DC;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Quadra */
+.court {
+  position: relative;
+  border: 3px solid var(--court-line);
+  padding: clamp(18px, 4vw, 40px);
+  display: grid;
+  gap: clamp(20px, 4vw, 36px);
+  overflow: hidden;
+}
+.court-lines { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--court-line); pointer-events: none; }
+.hero { position: relative; display: flex; align-items: center; gap: clamp(14px, 3vw, 32px); }
+.hero-text { min-width: 0; }
+.ball { flex: 0 0 auto; width: clamp(68px, 15vw, 140px); height: clamp(68px, 15vw, 140px); animation: spin 16s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.eyebrow {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(34px, 8vw, 76px);
+  line-height: 0.98;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.lead { margin: 12px 0 0; max-width: 52ch; color: var(--muted); font-size: clamp(15px, 2.4vw, 18px); }
+
+/* Placar */
+.board {
+  position: relative;
+  background: var(--board);
+  color: var(--led);
+  border: 1px solid var(--board-line);
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.6);
+}
+.board-top {
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--board-line);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--led-dim);
+}
+.cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cell { padding: clamp(12px, 3vw, 26px) 4px clamp(10px, 2.4vw, 18px); text-align: center; min-width: 0; }
+.cell + .cell { border-left: 1px solid var(--board-line); }
+.num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(46px, 13vw, 128px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 18px rgba(255, 200, 61, 0.35);
+}
+.lab {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(12px, 2.4vw, 16px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--led-dim);
+}
+.again {
+  display: none;
+  margin: 0;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--board-line);
+  text-align: center;
+}
+.is-done .again { display: block; }
+
+button, input, textarea { font: inherit; color: inherit; }
+.btn {
+  appearance: none;
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 11px 22px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; filter: none; }
+.btn-ghost { background: transparent; color: var(--led); border: 2px solid var(--led); padding: 8px 18px; font-size: 16px; }
+
+/* Rede */
+.net {
+  margin: clamp(28px, 6vw, 48px) 0 clamp(22px, 4vw, 32px);
+  height: 30px;
+  border-top: 5px solid var(--fg);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 13px, var(--net) 13px 14px),
+    repeating-linear-gradient(0deg, transparent 0 9px, var(--net) 9px 10px);
+}
+
+/* Mural */
+.mural-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(30px, 5vw, 46px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+.mural-head p { margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+.mural-grid { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: clamp(20px, 4vw, 40px); margin-top: 24px; align-items: start; }
+@media (max-width: 760px) { .mural-grid { grid-template-columns: minmax(0, 1fr); } }
+
+form { display: grid; gap: 16px; background: var(--surface); border: 2px solid var(--line); padding: 20px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+label, legend {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+input[type="text"], textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid var(--line);
+  padding: 10px 12px;
+  border-radius: 0;
+}
+textarea { min-height: 120px; resize: vertical; }
+.count { justify-self: end; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatch { position: relative; display: inline-block; }
+.swatch input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.swatch span { display: block; width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.18); }
+.swatch input:checked + span { border-color: var(--fg); }
+.swatch input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sw1 { background: var(--n1-bg); } .sw2 { background: var(--n2-bg); } .sw3 { background: var(--n3-bg); } .sw4 { background: var(--n4-bg); }
+.status { margin: 0; min-height: 1.5em; font-size: 14px; color: var(--muted); }
+.status.err { color: var(--accent); }
+.notice { margin: 0; padding: 12px 14px; border: 2px dashed var(--line); color: var(--muted); font-size: 15px; }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; min-width: 0; }
+.note {
+  margin: 0;
+  padding: 16px 16px 12px;
+  display: grid;
+  gap: 12px;
+  align-content: space-between;
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1), 0 10px 18px -12px rgba(0, 0, 0, 0.45);
+  min-width: 0;
+}
+.note.c1 { background: var(--n1-bg); color: var(--n1-fg); }
+.note.c2 { background: var(--n2-bg); color: var(--n2-fg); }
+.note.c3 { background: var(--n3-bg); color: var(--n3-fg); }
+.note.c4 { background: var(--n4-bg); color: var(--n4-fg); }
+.note p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 17px; line-height: 1.45; }
+.note footer { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.note .who { font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
+.note .when { opacity: 0.8; font-variant-numeric: tabular-nums; }
+.note .rm { appearance: none; border: 0; background: transparent; text-decoration: underline; cursor: pointer; font-size: 13px; padding: 2px 0; }
+.empty { grid-column: 1 / -1; margin: 0; padding: 28px 20px; border: 2px dashed var(--line); color: var(--muted); }
+
+.foot { margin-top: 40px; font-size: 13px; color: var(--muted); }
+
+/* Final: a bola passa por cima da rede e cai do outro lado */
+.finale {
+  position: fixed; inset: 0; z-index: 50;
+  background: radial-gradient(120% 90% at 50% 0%, #17365E 0%, #0B1B30 60%, #060F1C 100%);
+  color: #fff;
+  overflow-y: auto;
+  display: flex; align-items: center; justify-content: center;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.stage { position: relative; z-index: 1; width: 100%; max-width: 960px; display: grid; gap: clamp(22px, 5vh, 44px); justify-items: center; text-align: center; }
+.scene { --sh: clamp(200px, 34vh, 320px); --bs: clamp(46px, 9vw, 66px); position: relative; width: 100%; height: var(--sh); }
+.floor { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, 0.4); }
+.fnet {
+  position: absolute; left: 50%; bottom: 0; width: 12px; height: 46%; transform: translateX(-50%);
+  border-top: 6px solid #fff;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 9px, rgba(255, 255, 255, 0.5) 9px 10px),
+    repeating-linear-gradient(90deg, transparent 0 5px, rgba(255, 255, 255, 0.35) 5px 6px);
+}
+.fnet::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 4px; height: calc(100% + 6px); background: rgba(255, 255, 255, 0.7); transform: translateX(-50%); }
+.flyx { position: absolute; bottom: 0; left: 6%; width: var(--bs); height: var(--bs); }
+.flyy { width: 100%; height: 100%; }
+.flyy svg { width: 100%; height: 100%; display: block; }
+.play .flyx { animation: bx 2.4s linear forwards; }
+.play .flyy { animation: by 2.4s forwards; }
+.play .flyy svg { animation: spin 0.9s linear infinite; }
+@keyframes bx { from { left: 6%; } to { left: calc(88% - var(--bs)); } }
+@keyframes by {
+  0% { transform: translateY(0); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  45% { transform: translateY(calc(var(--sh) * -0.8)); animation-timing-function: cubic-bezier(0.7, 0, 0.8, 0.4); }
+  100% { transform: translateY(0); }
+}
+.burst { position: absolute; bottom: -10px; left: calc(88% - var(--bs) * 1.5); width: calc(var(--bs) * 2); height: calc(var(--bs) * 2); border: 4px solid var(--led, #FFC83D); border-radius: 50%; opacity: 0; transform: scale(0.2); }
+.play .burst { animation: boom 0.9s 2.4s ease-out forwards; }
+@keyframes boom { 0% { opacity: 1; transform: scale(0.2); } 100% { opacity: 0; transform: scale(2.2); } }
+
+.finale-text { margin: 0; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; line-height: 1.02; font-size: clamp(30px, 6.4vw, 66px); text-wrap: balance; }
+.finale-text .line { display: block; }
+.finale-text .line + .line { margin-top: 0.25em; font-size: 0.72em; color: #D6E4F5; }
+.word { display: inline-block; opacity: 0; transform: translateY(0.6em) scale(0.96); }
+.play .word { animation: rise 0.5s calc(2.6s + var(--i) * 0.14s) cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards; }
+.name { color: #FFC83D; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+.finale-actions { opacity: 0; }
+.play .finale-actions { animation: rise 0.5s 4.6s forwards; }
+.finale .btn { background: #FFC83D; color: #0B1B30; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ball, .play .flyy svg { animation: none; }
+  .play .flyx, .play .flyy, .play .burst { animation: none; }
+  .flyx { left: calc(88% - var(--bs)); }
+  .word, .finale-actions { opacity: 1; transform: none; animation: none !important; }
+  .note { transform: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <clipPath id="ballclip"><circle cx="50" cy="50" r="48"/></clipPath>
+    <symbol id="ball" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="48" fill="#F2C230"/>
+      <g clip-path="url(#ballclip)" fill="none" stroke-linecap="round">
+        <path d="M-12 30 C 24 6, 70 16, 112 54" stroke="#1F5FBF" stroke-width="19"/>
+        <path d="M-12 80 C 30 52, 68 72, 112 98" stroke="#1F5FBF" stroke-width="19"/>
+        <path d="M34 -12 C 18 28, 44 62, 38 112" stroke="#1F5FBF" stroke-width="15"/>
+        <path d="M-12 30 C 24 6, 70 16, 112 54" stroke="#0E2A47" stroke-width="1.4" transform="translate(0 -10)"/>
+        <path d="M-12 30 C 24 6, 70 16, 112 54" stroke="#0E2A47" stroke-width="1.4" transform="translate(0 10)"/>
+        <path d="M34 -12 C 18 28, 44 62, 38 112" stroke="#0E2A47" stroke-width="1.4" transform="translate(-9 0)"/>
+        <path d="M34 -12 C 18 28, 44 62, 38 112" stroke="#0E2A47" stroke-width="1.4" transform="translate(9 0)"/>
+      </g>
+      <circle cx="50" cy="50" r="48" fill="none" stroke="#0E2A47" stroke-width="2.5"/>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <section class="court" aria-labelledby="titulo">
+    <svg class="court-lines" viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" stroke-width="3" vector-effect="non-scaling-stroke">
+        <line x1="400" y1="0" x2="400" y2="400" vector-effect="non-scaling-stroke"/>
+        <line x1="267" y1="0" x2="267" y2="400" vector-effect="non-scaling-stroke"/>
+        <line x1="533" y1="0" x2="533" y2="400" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+
+    <div class="hero">
+      <svg class="ball" aria-hidden="true" focusable="false"><use href="#ball"/></svg>
+      <div class="hero-text">
+        <p class="eyebrow">Retorno ao trabalho</p>
+        <h1 id="titulo">Andréa Perin está voltando</h1>
+        <p class="lead" id="lead">Contagem para o saque inicial: quarta-feira, 18 de novembro de 2026, às 8h. Enquanto isso, deixe um recado de boas-vindas no mural.</p>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="board-top"><span>Placar</span><span>Saque às 08h00 · 18/11</span></div>
+      <div class="cells" aria-hidden="true">
+        <div class="cell"><span class="num" id="v-d">--</span><span class="lab">dias</span></div>
+        <div class="cell"><span class="num" id="v-h">--</span><span class="lab">horas</span></div>
+        <div class="cell"><span class="num" id="v-m">--</span><span class="lab">min</span></div>
+        <div class="cell"><span class="num" id="v-s">--</span><span class="lab">seg</span></div>
+      </div>
+      <p class="sr" id="resumo" aria-live="polite"></p>
+      <p class="again"><button class="btn btn-ghost" id="rever" type="button">Rever a surpresa</button></p>
+    </div>
+  </section>
+
+  <div class="net" role="presentation"></div>
+
+  <section aria-labelledby="mural-titulo">
+    <div class="mural-head">
+      <h2 id="mural-titulo">Mural de recados</h2>
+      <p>Escreva uma mensagem para a Andréa. Os recados aparecem para todo mundo, na hora.</p>
+    </div>
+
+    <div class="mural-grid">
+      <form id="form" autocomplete="off">
+        <div class="field">
+          <label for="nome">Seu nome</label>
+          <input type="text" id="nome" maxlength="40" placeholder="Como você quer assinar">
+        </div>
+        <div class="field">
+          <label for="msg">Recado</label>
+          <textarea id="msg" maxlength="280" placeholder="Bem-vinda de volta, Andréa!" required></textarea>
+          <span class="count" id="count">0/280</span>
+        </div>
+        <fieldset>
+          <legend>Cor do recado</legend>
+          <div class="swatches">
+            <label class="swatch"><input type="radio" name="cor" value="1" checked><span class="sw1"></span><span class="sr">Amarelo</span></label>
+            <label class="swatch"><input type="radio" name="cor" value="2"><span class="sw2"></span><span class="sr">Azul</span></label>
+            <label class="swatch"><input type="radio" name="cor" value="3"><span class="sw3"></span><span class="sr">Laranja</span></label>
+            <label class="swatch"><input type="radio" name="cor" value="4"><span class="sw4"></span><span class="sr">Verde</span></label>
+          </div>
+        </fieldset>
+        <button class="btn" id="enviar" type="submit">Mandar o recado</button>
+        <p class="status" id="status" role="status"></p>
+      </form>
+
+      <div style="min-width:0">
+        <p class="notice" id="aviso" hidden></p>
+        <div class="notes" id="notes" aria-live="polite">
+          <p class="empty" id="carregando">Carregando os recados...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Para rever a surpresa de volta ao trabalho antes da hora, abra o endereço deste site terminando em #final.</p>
+</main>
+
+<div class="finale" id="finale" role="dialog" aria-modal="true" aria-labelledby="finale-text" hidden>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="stage">
+    <div class="scene" id="scene" aria-hidden="true">
+      <div class="floor"></div>
+      <div class="fnet"></div>
+      <div class="flyx" id="flyx"><div class="flyy"><svg focusable="false"><use href="#ball"/></svg></div></div>
+      <div class="burst"></div>
+    </div>
+    <p class="finale-text" id="finale-text"></p>
+    <div class="finale-actions"><button class="btn" id="finale-close" type="button">Ir para o mural</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var TARGET = new Date("2026-11-18T08:00:00-03:00").getTime();
+  var $ = function (id) { return document.getElementById(id); };
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Contagem ---------- */
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function plural(n, a, b) { return n + " " + (n === 1 ? a : b); }
+  var els = { d: $("v-d"), h: $("v-h"), m: $("v-m"), s: $("v-s") };
+  var shown = {};
+  function put(k, v) { if (shown[k] !== v) { shown[k] = v; els[k].textContent = v; } }
+  var done = false, timer = 0, lastMin = -1;
+
+  function tick() {
+    var diff = TARGET - Date.now();
+    if (diff <= 0) { finish(); return; }
+    var t = Math.floor(diff / 1000);
+    var d = Math.floor(t / 86400), h = Math.floor((t % 86400) / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+    put("d", pad(d)); put("h", pad(h)); put("m", pad(m)); put("s", pad(s));
+    var mm = Math.floor(t / 60);
+    if (mm !== lastMin) {
+      lastMin = mm;
+      $("resumo").textContent = "Faltam " + plural(d, "dia", "dias") + ", " + plural(h, "hora", "horas") + " e " + plural(m, "minuto", "minutos") + " para a volta da Andréa.";
+    }
+  }
+  function finish() {
+    if (done) return;
+    done = true;
+    clearInterval(timer);
+    put("d", "00"); put("h", "00"); put("m", "00"); put("s", "00");
+    document.body.classList.add("is-done");
+    $("titulo").textContent = "Andréa Perin voltou ao jogo";
+    $("lead").textContent = "O saque inicial já foi dado: hoje é dia de volta ao trabalho. Deixe seu recado de boas-vindas no mural.";
+    $("resumo").textContent = "A contagem terminou. Andréa voltou ao trabalho.";
+    openFinale();
+  }
+
+  /* ---------- Final animado ---------- */
+  var fin = $("finale"), closeBtn = $("finale-close"), cv = $("confetti"), ctx = cv.getContext("2d");
+  var parts = [], raf = 0, burstTimer = 0, rainTimer = 0, lastFocus = null;
+  var COLORS = ["#FFC83D", "#1F5FBF", "#FF7A4D", "#FFFFFF", "#58C48A"];
+  var LINES = ["De volta ao trabalho Andréa,", "as prestações de contas sentiram sua falta"];
+  (function buildText() {
+    var host = $("finale-text"), i = 0;
+    LINES.forEach(function (line) {
+      var ln = document.createElement("span");
+      ln.className = "line";
+      line.split(" ").forEach(function (w) {
+        var sp = document.createElement("span");
+        sp.className = "word" + (w.indexOf("Andréa") === 0 ? " name" : "");
+        sp.style.setProperty("--i", i++);
+        sp.textContent = w;
+        ln.appendChild(sp);
+        ln.appendChild(document.createTextNode(" "));
+      });
+      host.appendChild(ln);
+    });
+  })();
+
+  function sizeCanvas() {
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(window.innerWidth * dpr);
+    cv.height = Math.round(window.innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function spawn(x, y, n, up) {
+    for (var i = 0; i < n; i++) {
+      parts.push({
+        x: x, y: y,
+        vx: (Math.random() - 0.5) * (up ? 16 : 6),
+        vy: up ? -(6 + Math.random() * 13) : Math.random() * 3,
+        w: 6 + Math.random() * 7, h: 4 + Math.random() * 5,
+        r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.4,
+        c: COLORS[i % COLORS.length]
+      });
+    }
+    if (!raf) raf = requestAnimationFrame(loop);
+  }
+  function loop() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      p.vy += 0.26; p.vx *= 0.992; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (p.y > window.innerHeight + 30) { parts.splice(i, 1); continue; }
+      ctx.save();
+      ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    raf = parts.length ? requestAnimationFrame(loop) : 0;
+  }
+  function celebrate() {
+    if (reduce || fin.hidden) return;
+    sizeCanvas();
+    var b = $("flyx").getBoundingClientRect();
+    spawn(b.left + b.width / 2, b.top + b.height / 2, 150, true);
+    rainTimer = setTimeout(function () {
+      spawn(window.innerWidth * 0.2, -10, 70, false);
+      spawn(window.innerWidth * 0.8, -10, 70, false);
+    }, 700);
+  }
+  function openFinale() {
+    lastFocus = document.activeElement;
+    fin.hidden = false;
+    document.body.style.overflow = "hidden";
+    fin.classList.remove("play");
+    void fin.offsetWidth;
+    fin.classList.add("play");
+    closeBtn.focus({ preventScroll: true });
+    clearTimeout(burstTimer); clearTimeout(rainTimer);
+    burstTimer = setTimeout(celebrate, 2400);
+  }
+  function closeFinale() {
+    fin.hidden = true;
+    fin.classList.remove("play");
+    document.body.style.overflow = "";
+    clearTimeout(burstTimer); clearTimeout(rainTimer);
+    cancelAnimationFrame(raf); raf = 0; parts = [];
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  closeBtn.addEventListener("click", closeFinale);
+  $("rever").addEventListener("click", openFinale);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !fin.hidden) closeFinale(); });
+  window.addEventListener("hashchange", function () { if (location.hash === "#final" && fin.hidden) openFinale(); });
+
+  tick();
+  if (!done) timer = setInterval(tick, 500);
+  if (!done && location.hash === "#final") openFinale();
+
+  /* ---------- Mural ---------- */
+  var MAX = 280;
+  var form = $("form"), msg = $("msg"), nome = $("nome"), btn = $("enviar"), statusEl = $("status");
+  var box = $("notes"), aviso = $("aviso");
+  var col = null, isAdmin = false, loaded = false, sending = false, notes = [], statusTimer = 0;
+
+  msg.addEventListener("input", function () { $("count").textContent = msg.value.length + "/" + MAX; });
+
+  function setStatus(text, err) {
+    statusEl.textContent = text;
+    statusEl.className = "status" + (err ? " err" : "");
+    clearTimeout(statusTimer);
+    if (text && !err) statusTimer = setTimeout(function () { statusEl.textContent = ""; }, 5000);
+  }
+  function readOnly(text) {
+    aviso.textContent = text;
+    aviso.hidden = false;
+    msg.disabled = true; nome.disabled = true; btn.disabled = true;
+    form.querySelectorAll('input[name="cor"]').forEach(function (r) { r.disabled = true; });
+  }
+  function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return h; }
+
+  function render() {
+    box.replaceChildren();
+    if (!notes.length) {
+      var e = document.createElement("p");
+      e.className = "empty";
+      e.textContent = loaded ? "Ainda não há recados. Abra o jogo com o primeiro." : "Carregando os recados...";
+      box.appendChild(e);
+      return;
+    }
+    notes.forEach(function (n) {
+      var cor = Math.min(4, Math.max(1, parseInt(n.cor, 10) || 1));
+      var art = document.createElement("article");
+      art.className = "note c" + cor;
+      art.style.setProperty("--tilt", (((hash(n.id) % 5) + 5) % 5 - 2) * 0.35 + "deg");
+      var p = document.createElement("p");
+      p.textContent = String(n.texto || "").slice(0, MAX);
+      var ft = document.createElement("footer");
+      var who = document.createElement("span");
+      who.className = "who";
+      who.textContent = String(n.nome || "Alguém do time").slice(0, 40);
+      var when = document.createElement("span");
+      when.className = "when";
+      var ts = Number(n.criadoEm);
+      when.textContent = ts ? new Date(ts).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
+      ft.appendChild(who); ft.appendChild(when);
+      if (isAdmin) {
+        var rm = document.createElement("button");
+        rm.type = "button"; rm.className = "rm"; rm.textContent = "remover";
+        rm.setAttribute("aria-label", "Remover o recado de " + who.textContent);
+        rm.addEventListener("click", function () {
+          rm.disabled = true;
+          col.doc(n.id).delete().catch(function () { rm.disabled = false; setStatus("Não foi possível remover agora.", true); });
+        });
+        ft.appendChild(rm);
+      }
+      art.appendChild(p); art.appendChild(ft);
+      box.appendChild(art);
+    });
+  }
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    if (sending || !col) return;
+    var texto = msg.value.trim();
+    if (!texto) { setStatus("Escreva uma mensagem antes de enviar.", true); msg.focus(); return; }
+    var cor = form.querySelector('input[name="cor"]:checked');
+    sending = true; btn.disabled = true; setStatus("Enviando...", false);
+    col.add({
+      nome: nome.value.trim().slice(0, 40) || "Alguém do time",
+      texto: texto.slice(0, MAX),
+      cor: cor ? parseInt(cor.value, 10) : 1,
+      criadoEm: Date.now()
+    }).then(function () {
+      msg.value = ""; $("count").textContent = "0/" + MAX;
+      setStatus("Recado enviado. Ele já aparece no mural.", false);
+    }).catch(function (e) {
+      var code = e && e.code;
+      if (code === "invalid_argument") { readOnly("Seu acesso permite só ler os recados. Peça ao dono do site acesso de colaborador para escrever."); setStatus("", false); }
+      else if (code === "quota_exceeded") setStatus("O mural está cheio e não aceita mais recados.", true);
+      else setStatus("Não foi possível enviar agora. Tente de novo em instantes.", true);
+    }).then(function () { sending = false; if (!msg.disabled) btn.disabled = false; });
+  });
+
+  (async function initMural() {
+    var c = window.claude;
+    if (!c || !c.use) { readOnly("O mural funciona quando o site é aberto pelo link compartilhado."); loaded = true; render(); return; }
+    var results = await Promise.all([c.use("db"), c.use("user")]);
+    var db = results[0], user = results[1];
+    if (!db) { readOnly("O mural não está disponível nesta visualização. Abra o site pelo link compartilhado."); loaded = true; render(); return; }
+    try {
+      if (user) {
+        var can = await Promise.resolve(user.can("data.write"));
+        if (can === false) readOnly("Você pode ler os recados. Para escrever, peça ao dono do site acesso de colaborador.");
+        isAdmin = !!(await Promise.resolve(user.canEdit()));
+      }
+    } catch (e) {}
+    col = db.collection("recados");
+    var slow = setTimeout(function () {
+      if (!loaded) { var p = box.querySelector(".empty"); if (p) p.textContent = "Ainda não foi possível carregar os recados. Eles aparecem assim que a conexão responder."; }
+    }, 10000);
+    col.orderBy("criadoEm", "desc").limit(200).onSnapshot(function (snap) {
+      notes = snap.docs.map(function (d) { var o = d.data() || {}; return Object.assign({ id: d.id }, o); });
+      loaded = true; clearTimeout(slow); render();
+    }, function () {
+      loaded = true; clearTimeout(slow);
+      aviso.textContent = "Não foi possível carregar os recados agora."; aviso.hidden = false; render();
+    });
+  })();
+})();
+</script>
+
+</body></html>
